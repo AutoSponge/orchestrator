@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "test": "npm run jshint && tape test/*.js",
+    "test-x": "browserify test/*.test.js | tape-run",
+    "test-xx": "browserify -t coverify test/*.js | testling",
+    "test-xxx": "browserify -t coverify test/*.js --bare | node | coverify",
+    "test-xxxx": "browserify -t coverify test/*.test.js | testling | coverify",
+    "test-xxxxx": "covert test/*.js",
+    "jshint": "jshint --reporter=node_modules/jshint-stylish/stylish.js *.js"
+  },
+  "devDependencies": {
+    "jshint": "^2.5.0",
+    "jshint-stylish": "^0.2.0",
+    "tape": "^2.12.3"
+  }
+}
