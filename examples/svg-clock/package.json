@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "inherits": "^2.0.1"
+  },
+  "scripts": {
+    "build": "browserify js/app.js > build/app.js"
+  }
+}

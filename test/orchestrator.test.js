@@ -14,18 +14,21 @@ test( 'orchestrator instantiates', function ( t ) {
 } );
 
 test( 'orchestrator has the correct interface', function ( t ) {
-    t.plan( 2 );
+    t.plan( 5 );
 
     var orchestrator = new Orchestrator();
-    t.equal( typeof orchestrator.register, 'function' );
+    t.equal( typeof orchestrator.add, 'function' );
+    t.equal( typeof orchestrator.addAll, 'function' );
     t.equal( typeof orchestrator.connect, 'function' );
+    t.equal( typeof orchestrator.connectAll, 'function' );
+    t.equal( typeof orchestrator.dispatch, 'function' );
 } );
 
 test( 'orchestrator has a fluent interface', function ( t ) {
     t.plan( 2 );
 
     var orchestrator = new Orchestrator();
-    t.equal( orchestrator.register({
+    t.equal( orchestrator.add({
         name:'a',
         component:Object.create( EventEmitter.prototype, {})}), orchestrator );
     t.equal( orchestrator.connect({
@@ -71,8 +74,8 @@ test( 'orchestrator has a unique registry', function ( t ) {
             }
         }
     } );
-    orchestrator1.register({name: 'test', component: a});
-    orchestrator2.register({name: 'test', component: b});
+    orchestrator1.add({name: 'test', component: a});
+    orchestrator2.add({name: 'test', component: b});
     t.equal( a.recorded, null );
     t.equal( b.recorded, null );
 
@@ -86,7 +89,7 @@ test( 'orchestrator has a unique registry', function ( t ) {
 
 } );
 
-test( 'orchestrator', function ( t ) {
+test( 'orchestrator data', function ( t ) {
     t.plan( 2 );
 
     var a = Object.create( EventEmitter.prototype, {
@@ -157,11 +160,94 @@ test( 'orchestrator', function ( t ) {
         }
     ];
 
+    var orchestrator = new Orchestrator( {
+        processes: processes,
+        connections: connections
+    } );
+
+    t.equal( 'TEST', recorder.recorded, 'orchestrator should connect components correctly' );
+} );
+
+test( 'orchestrator event', function ( t ) {
+    t.plan( 3 );
+
+    var a = Object.create( EventEmitter.prototype, {
+        'string->IN': {
+            value: function ( data ) {
+                this.emit( 'OUT->string', data );
+            }
+        }
+    } );
+
+    var b = Object.create( EventEmitter.prototype, {
+        'string->IN': {
+            value: function ( data ) {
+                this.emit( 'OUT->string', data.toUpperCase() );
+            }
+        }
+    } );
+
+    var recorder = Object.create( EventEmitter.prototype, {
+        recorded: {
+            value: null,
+            writable: true,
+            enumerable: true,
+            configurable: true
+        },
+        'string->IN': {
+            value: function ( data ) {
+                this.recorded = data;
+            }
+        }
+    } );
+
+    t.equal( recorder.recorded, null, 'test should initialize correctly' );
+
+    var processes = [
+        {name: 'a', component: a},
+        {name: 'b', component: b},
+        {name: 'recorder', component: recorder}
+    ];
+
+    var connections = [
+        {
+            source: {
+                process: 'b',
+                port: 'OUT->string'
+            },
+            target: {
+                process: 'recorder',
+                port: 'string->IN'
+            }
+        },
+        {
+            source: {
+                process: 'a',
+                port: 'OUT->string'
+            },
+            target: {
+                process: 'b',
+                port: 'string->IN'
+            }
+        },
+        {
+            event: 'start',
+            target: {
+                process: 'a',
+                port: 'string->IN'
+            }
+        }
+    ];
+
     var orchestrator = new Orchestrator();
 
-    processes.forEach( orchestrator.register );
+    orchestrator.addAll( processes );
 
-    connections.forEach( orchestrator.connect );
+    orchestrator.connectAll( connections );
+
+    t.equal( recorder.recorded, null, 'test should initialize correctly' );
+
+    orchestrator.dispatch( 'start', 'test' );
 
     t.equal( 'TEST', recorder.recorded, 'orchestrator should connect components correctly' );
 } );

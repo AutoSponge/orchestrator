@@ -1,0 +1,239 @@
+[
+    {
+        "event": "animate",
+        "target": {
+            "process": "animate",
+            "port": "boolean->IN"
+        }
+    },
+    {
+        "source": {
+            "process": "init",
+            "port": "OUT->elementConfig"
+        },
+        "target": {
+            "process": "draw",
+            "port": "elementConfig->IN"
+        }
+    },
+    {
+        "data": [
+            {
+                "type": "svg",
+                "layer": 1,
+                "class": "container",
+                "data": {
+                    "version": "1.2",
+                    "baseProfile": "tiny",
+                    "viewBox": "0 0 200 200",
+                    "enable-background": "0 0 200 200"
+                }
+            },
+            {
+                "type": "circle",
+                "layer": 2,
+                "class": "clock",
+                "data": {
+                    "cx": 100,
+                    "cy": 100,
+                    "r": 90
+                }
+            },
+            {
+                "type": "text",
+                "layer": 1,
+                "class": "text",
+                "textContent": "12",
+                "data": {
+                    "x": 92,
+                    "y": 30
+                }
+            },
+            {
+                "type": "text",
+                "layer": 1,
+                "class": "text",
+                "textContent": "3",
+                "data": {
+                    "x": 175,
+                    "y": 106
+                }
+            },
+            {
+                "type": "text",
+                "layer": 1,
+                "class": "text",
+                "textContent": "6",
+                "data": {
+                    "x": 96,
+                    "y": 180
+                }
+            },
+            {
+                "type": "text",
+                "layer": 1,
+                "class": "text",
+                "textContent": "9",
+                "data": {
+                    "x": 18,
+                    "y": 106
+                }
+            },
+            {
+                "type": "circle",
+                "layer": 1,
+                "class": "pin",
+                "data": {
+                    "cx": 100,
+                    "cy": 100,
+                    "r": 2
+                }
+            }
+        ],
+        "target": {
+            "process": "init",
+            "port": "array[config]->IN"
+        }
+    },
+    {
+        "data": {
+            "type": "line",
+            "layer": 1,
+            "class": "hours",
+            "data": {
+                "x1": 100,
+                "y1": 45,
+                "x2": 100,
+                "y2": 100
+            }
+        },
+        "target": {
+            "process": "drawHours",
+            "port": "elementConfig->IN"
+        }
+    },
+    {
+        "data": {
+            "type": "line",
+            "layer": 1,
+            "class": "minutes",
+            "data": {
+                "x1": 100,
+                "y1": 25,
+                "x2": 100,
+                "y2": 100
+            }
+        },
+        "target": {
+            "process": "drawMinutes",
+            "port": "elementConfig->IN"
+        }
+    },
+    {
+        "data": {
+            "type": "line",
+            "layer": 1,
+            "class": "seconds",
+            "data": {
+                "x1": 100,
+                "y1": 15,
+                "x2": 100,
+                "y2": 100
+            }
+        },
+        "target": {
+            "process": "drawSeconds",
+            "port": "elementConfig->IN"
+        }
+    },
+    {
+        "source": {
+            "process": "animate",
+            "port": "OUT->date"
+        },
+        "target": {
+            "process": "extractSeconds",
+            "port": "date->IN"
+        }
+    },
+    {
+        "source": {
+            "process": "extractSeconds",
+            "port": "OUT->units"
+        },
+        "target": {
+            "process": "convertSeconds",
+            "port": "units->IN"
+        }
+    },
+    {
+        "source": {
+            "process": "convertSeconds",
+            "port": "OUT->degrees"
+        },
+        "target": {
+            "process": "drawSeconds",
+            "port": "degrees->IN"
+        }
+    },
+    {
+        "source": {
+            "process": "animate",
+            "port": "OUT->date"
+        },
+        "target": {
+            "process": "extractMinutes",
+            "port": "date->IN"
+        }
+    },
+    {
+        "source": {
+            "process": "extractMinutes",
+            "port": "OUT->units"
+        },
+        "target": {
+            "process": "convertMinutes",
+            "port": "units->IN"
+        }
+    },
+    {
+        "source": {
+            "process": "convertMinutes",
+            "port": "OUT->degrees"
+        },
+        "target": {
+            "process": "drawMinutes",
+            "port": "degrees->IN"
+        }
+    },
+    {
+        "source": {
+            "process": "animate",
+            "port": "OUT->date"
+        },
+        "target": {
+            "process": "extractHours",
+            "port": "date->IN"
+        }
+    },
+    {
+        "source": {
+            "process": "extractHours",
+            "port": "OUT->units"
+        },
+        "target": {
+            "process": "convertHours",
+            "port": "units->IN"
+        }
+    },
+    {
+        "source": {
+            "process": "convertHours",
+            "port": "OUT->degrees"
+        },
+        "target": {
+            "process": "drawHours",
+            "port": "degrees->IN"
+        }
+    }
+]

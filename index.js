@@ -1,4 +1,5 @@
 'use strict';
+var EventEmitter = require( 'events' ).EventEmitter;
 
 function delegate( registry, component, method ) {
     return function () {
@@ -6,13 +7,16 @@ function delegate( registry, component, method ) {
     };
 }
 
-function Orchestrator() {
-    return Orchestrator.factory();
+function Orchestrator( config ) {
+    return Orchestrator.factory( config );
 }
 
-Orchestrator.factory = function () {
-    var registry = Object.create( null );
+Orchestrator.factory = function ( config ) {
+    var registry = Object.create( EventEmitter.prototype );
     return Object.create( Orchestrator.prototype, {
+        config: {
+            value: config || {}
+        },
         connect: {
             value: function ( options ) {
                 var target = options.target && options.target.process;
@@ -23,18 +27,47 @@ Orchestrator.factory = function () {
                 if ( source ) {
                     registry[source].on( sourcePort, delegate( registry, target, targetPort ) );
                 } else {
-                    delegate( registry, target, targetPort )( data );
+                    if ( options.event ) {
+                        registry.on( options.event, function () {
+                            delegate( registry, target, targetPort ).apply( null, arguments );
+                        } );
+                    } else {
+                        delegate( registry, target, targetPort )( data );
+                    }
                 }
                 return this;
             }
         },
-        register: {
+        connectAll: {
+            value: function ( arr ) {
+                (arr || this.config.connections || []).forEach( this.connect );
+                return this;
+            }
+        },
+        add: {
             value: function ( process ) {
-                registry[process.name] = process.component;
+                var component = process.component;
+                if ( typeof component === 'function' ) {
+                    component = component.apply( process, process.args || [] );
+                }
+                registry[process.name] = component;
+                return this;
+            }
+        },
+        addAll: {
+            value: function ( arr ) {
+                (arr || this.config.processes || []).forEach( this.add );
+                return this;
+            }
+        },
+        dispatch: {
+            value: function () {
+                registry.emit.apply( registry, arguments );
                 return this;
             }
         }
-    } );
+    } ).addAll()
+        .connectAll();
 };
 
 module.exports = Orchestrator;

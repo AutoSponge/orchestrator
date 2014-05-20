@@ -9,3 +9,7 @@ orchestrator
 - finish package.json
 - publish to npm
 
+- wire up only what is connected (obj based, not array)
+- check for type agreement
+- add hooks for instrumentation/debug
+
